@@ -1,10 +1,12 @@
 (ql:quickload :cl-svg)
 (ql:quickload :local-time)
 (ql:quickload :yason)
+(ql:quickload :parse-float)
+
 
 
 (defpackage :svg-lib
-  (:use :cl :cl-svg)
+  (:use :cl :cl-svg :parse-float)
   (:local-nicknames (#:lt #:local-time)))
 
 (in-package :svg-lib)
@@ -91,8 +93,11 @@
   (setf *y2* (make-array *n* :element-type 'float))
   (setf *x* (make-array *n* :element-type 'float)))
 
+(defun select-index (n m)
+  (nreverse (loop for i from 0 to (1- m) collect (- n (floor (* i (/ n m)))))))
+
 (defun fetch-data (&optional (n *n*))
-  (assert (and (integerp *n*) (> *n* 0)))  
+  (assert (and (integerp n) (> n 0)))
   (let* ((cmd (str+
                "sqlite3 -json "
                (uiop:getenv "HOME")
@@ -112,18 +117,18 @@
 
 (defun fmt10 (x) (format nil "~,1f" x))
 
-(defun prepare-data ()
-  (assert (setf *data* (fetch-data *n*)))
+(defun prepare-data (&optional (n *n*))
+  (assert (setf *data* (fetch-data n)))
   (loop for d in *data*
-        for i from 0
+        for %i from 0
         for temp = (gethash "temp" d)
         for hum = (gethash "hum" d)
         for ts = (gethash "ts" d)
         for uts = (universal-timestamp ts)
         do (progn
-             (setf (aref *temp* i) temp)
-             (setf (aref *hum* i) hum)
-             (setf (aref *ts* i) uts)
+             (setf (aref *temp* %i) temp)
+             (setf (aref *hum* %i) hum)
+             (setf (aref *ts* %i) uts)
              (setf *state* (gethash "state" d)))
         maximize temp into max-temp
         minimize temp into min-temp
@@ -170,7 +175,7 @@
   (let ((x (gensym)))
     `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h))))
 
-(defun transform-data ()
+(defun transform-data (&optional (n *n*))
   (let ((h (- *h* *bottom-margin*))
         (w (- *w* (* 2 *left-right-margin*))))
     (assert (< 50 h))
@@ -185,7 +190,7 @@
     (assert (< (abs (- (mx-b-ts *max-ts*) w)) 0.001))
     (assert (< (abs (mx-b-ts *min-ts*)) 0.001))
     (loop for i from 0
-          while (< i *n*)
+          while (< i n)
           for temp = (aref *temp* i)
           for hum = (aref *hum* i)
           for ts = (aref *ts* i)
@@ -207,22 +212,12 @@
 
 (defmacro draw-polyline (factor)
   `(draw scene (:polyline
-                 :points (str+ lm ","
-                               (fmt10 (* ,factor (- *h* *bottom-margin*)))
-                               " " w ","
-                               (fmt10 (* ,factor (- *h* *bottom-margin*)))))
-          :stroke "grey" :stroke-width 1 :stroke-dasharray "3,3" :fill "none"))
+                :points (str+ lm ","
+                              (fmt10 (* ,factor (- *h* *bottom-margin*)))
+                              " " w ","
+                              (fmt10 (* ,factor (- *h* *bottom-margin*)))))
+         :stroke "grey" :stroke-width 1 :stroke-dasharray "3,3" :fill "none"))
 
-#|
-(let ((days #("So" "Mo" "Di" "Mi" "Do" "Fr" "Sa")))
-  (loop for i from 0
-        while (< i *n*)
-        for ts = (lt:universal-to-timestamp (aref *ts* i))
-        collect (format nil "~a ~a:~a"
-                        (aref days (lt:timestamp-day-of-week ts))
-                        (lt:timestamp-hour ts)
-                        (lt:timestamp-minute ts))))
-|#
 (defun format-ts (uts)
   (let ((days #("So" "Mo" "Di" "Mi" "Do" "Fr" "Sa"))
         (ts (lt:universal-to-timestamp uts)))
@@ -321,18 +316,36 @@
     (draw scene (:polyline :points (str+ w ",0 " w "," h))
           :stroke "blue" :stroke-width 1 :fill "none")
 
-    (loop for i from 1
-          while (< i *n*)
-          for %di = (* i (/ 1 *n*))
-          for x = (* %di (- *w* *left-right-margin*))
+
+
+    #|
+    (loop for i from 1                  ; ;
+    while (< i *n*)                     ; ;
+    for %di = (* i (/ 1 *n*))           ; ;
+    for x = (* %di (- *w* *left-right-margin*)) ; ;
+    for y = (- *h* 3)                   ; ;
+    for lb = (format-ts (aref *ts* i))  ; ;
+    do (when (evenp i)                  ; ;
+    (text scene                         ; ;
+    (:x (- x 20) :y y :font-size 9 :fill "black") lb) ; ;
+    (draw scene (:polyline              ; ;
+    :points (str+ (fmt10 x) ",0 " (fmt10 x) "," h)) ; ;
+    :stroke "lightgrey" :stroke-width 1 :fill "none"))) ; ;
+    |#
+    
+    (loop for i from 0
+          while (< i *lbl-m*)
+          for pos = (aref *lbl-pos* i)
+          for x = (- (parse-float pos) (/ *lbl-width* 2))
           for y = (- *h* 3)
-          for lb = (format-ts (aref *ts* i))
+          for lb = (aref *lbl-text* i)
           do (when (evenp i)
                (text scene
-                   (:x (- x 20) :y y :font-size 9 :fill "black") lb)
+                   (:x x :y y :font-size 9 :fill "black") lb)
                (draw scene (:polyline
-                            :points (str+ (fmt10 x) ",0 " (fmt10 x) "," h))
+                            :points (str+ pos ",0 " pos "," h))
                      :stroke "lightgrey" :stroke-width 1 :fill "none")))
+    
     
     (with-open-file (s #p"svg/test.svg" :direction :output :if-exists :supersede)
       (stream-out s scene))
