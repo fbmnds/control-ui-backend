@@ -1,0 +1,107 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="300" height="200" version="1.1" id="toplevel"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect x="0" y="0" width="300" height="200" fill="lavender"/>
+  <polyline points="22,18.6 278,18.6" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="167.40" font-size="10" fill="green">
+    9.5
+  </text>
+  <text x="279" y="167.40" font-size="10" fill="blue">
+    56.0
+  </text>
+  <polyline points="22,37.2 278,37.2" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="148.80" font-size="10" fill="green">
+    9.6
+  </text>
+  <text x="279" y="148.80" font-size="10" fill="blue">
+    56.1
+  </text>
+  <polyline points="22,55.8 278,55.8" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="130.20" font-size="10" fill="green">
+    9.7
+  </text>
+  <text x="279" y="130.20" font-size="10" fill="blue">
+    56.2
+  </text>
+  <polyline points="22,74.4 278,74.4" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="111.60" font-size="10" fill="green">
+    9.8
+  </text>
+  <text x="279" y="111.60" font-size="10" fill="blue">
+    56.3
+  </text>
+  <polyline points="22,93.0 278,93.0" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="93" font-size="10" fill="green">
+    9.9
+  </text>
+  <text x="279" y="93" font-size="10" fill="blue">
+    56.4
+  </text>
+  <polyline points="22,111.6 278,111.6" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="74.40" font-size="10" fill="green">
+    10.1
+  </text>
+  <text x="279" y="74.40" font-size="10" fill="blue">
+    56.5
+  </text>
+  <polyline points="22,130.2 278,130.2" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="55.80" font-size="10" fill="green">
+    10.2
+  </text>
+  <text x="279" y="55.80" font-size="10" fill="blue">
+    56.7
+  </text>
+  <polyline points="22,148.8 278,148.8" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="37.20" font-size="10" fill="green">
+    10.3
+  </text>
+  <text x="279" y="37.20" font-size="10" fill="blue">
+    56.8
+  </text>
+  <polyline points="22,167.4 278,167.4" stroke="grey" stroke-width="1"
+            stroke-dasharray="3,3" fill="none"/>
+  <text x="1" y="18.60" font-size="10" fill="green">
+    10.4
+  </text>
+  <text x="279" y="18.60" font-size="10" fill="blue">
+    56.9
+  </text>
+  <polyline points=" 37.3,67.6 44.5,67.6 63.1,67.6 101.2,67.6 139.3,67.6 177.3,84.5 215.4,84.5 219.7,101.5 242.9,101.5 262.7,67.6"
+            stroke="green" stroke-width="1" fill="none"/>
+  <polyline points=" 37.3,97.0 44.5,113.2 63.1,113.2 101.2,97.0 139.3,97.0 177.3,97.0 215.4,80.9 219.7,80.9 242.9,80.9 262.7,129.4"
+            stroke="blue" stroke-width="1" fill="none"/>
+  <polyline points="22,0 22,186" stroke="green" stroke-width="1" fill="none"/>
+  <polyline points="22,186 278,186" stroke="black" stroke-width="1" fill="none"/>
+  <polyline points="278,0 278,186" stroke="blue" stroke-width="1" fill="none"/>
+  <text x="35.60" y="197" font-size="9" fill="black">
+    Fr 16:34
+  </text>
+  <polyline points="55.6,0 55.6,186" stroke="lightgrey" stroke-width="1"
+            fill="none"/>
+  <text x="91.20" y="197" font-size="9" fill="black">
+    Fr 16:54
+  </text>
+  <polyline points="111.2,0 111.2,186" stroke="lightgrey" stroke-width="1"
+            fill="none"/>
+  <text x="146.80" y="197" font-size="9" fill="black">
+    Fr 17:14
+  </text>
+  <polyline points="166.8,0 166.8,186" stroke="lightgrey" stroke-width="1"
+            fill="none"/>
+  <text x="202.40" y="197" font-size="9" fill="black">
+    Fr 17:21
+  </text>
+  <polyline points="222.4,0 222.4,186" stroke="lightgrey" stroke-width="1"
+            fill="none"/>
+</svg>
