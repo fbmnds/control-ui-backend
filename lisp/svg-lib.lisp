@@ -3,17 +3,15 @@
 (ql:quickload :yason)
 
 
-(defpackage :cl-svg-test
+(defpackage :svg-lib
   (:use :cl :cl-svg)
   (:local-nicknames (#:lt #:local-time)))
 
 (in-package :cl-svg-test)
 
-(defparameter *s* nil)
-
-
 (defmacro str+ (&rest rest) `(concatenate 'string ,@rest))
 
+(defparameter *s* nil)
 (let ((scene (make-svg-toplevel 'svg-1.1-toplevel :height 300 :width 300)))
   (draw scene (:rect :x 5 :y 5 :height 30 :width 30))
   (draw scene (:rect :x 40 :y 40 :height 30 :width 30)
@@ -21,7 +19,6 @@
   (draw scene (:rect :x 75 :y 75 :height 30 :width 30)
         :fill "purple")
   (setf *s* scene))
-
   (with-output-to-string (s) (stream-out s *s*))
 
 (defparameter *n* nil)
@@ -186,7 +183,6 @@
                (setf (aref *x* i)
                      (fmt10 (+ *left-right-margin* (mx-b-ts ts))))))))
 
-
 (defun points (x y)
   (reduce (lambda (x acc) (str+ x " " acc))
           (loop for i from 0
@@ -204,7 +200,6 @@
                                " " w ","
                                (fmt10 (* ,factor (- *h* *bottom-margin*)))))
           :stroke "grey" :stroke-width 1 :stroke-dasharray "3,3" :fill "none"))
-
 
 (let ((days #("So" "Mo" "Di" "Mi" "Do" "Fr" "Sa")))
   (loop for i from 0
@@ -269,7 +264,7 @@
                             :points (str+ (fmt10 x) ",0 " (fmt10 x) "," h))
                      :stroke "lightgrey" :stroke-width 1 :fill "none")))
     
-    (with-open-file (s #p"test.svg" :direction :output :if-exists :supersede)
+    (with-open-file (s #p"svg/test.svg" :direction :output :if-exists :supersede)
       (stream-out s scene))
     ;;(with-output-to-string (s) (stream-out s scene))
     ))
