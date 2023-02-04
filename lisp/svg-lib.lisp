@@ -7,7 +7,7 @@
   (:use :cl :cl-svg)
   (:local-nicknames (#:lt #:local-time)))
 
-(in-package :cl-svg-test)
+(in-package :svg-lib)
 
 (defmacro str+ (&rest rest) `(concatenate 'string ,@rest))
 
@@ -46,6 +46,11 @@
 (defparameter *dh-hum* nil)
 (defparameter *dw* nil)
 
+(defparameter *lbl-width* nil)
+(defparameter *lbl-m* nil)
+(defparameter *lbl-text* nil)
+(defparameter *lbl-pos* nil)
+
 (defparameter *y1* (make-array *n* :element-type 'float))
 (defparameter *y2* (make-array *n* :element-type 'float))
 (defparameter *x* (make-array *n* :element-type 'float))
@@ -76,15 +81,22 @@
   (setf *dh-temp* nil)
   (setf *dh-hum* nil)
   (setf *dw* nil)
-  
+
+  (setf *lbl-width* 80)
+  (setf *lbl-m* nil)
+  (setf *lbl-text* nil)
+  (setf *lbl-pos* nil)
+
   (setf *y1* (make-array *n* :element-type 'float))
   (setf *y2* (make-array *n* :element-type 'float))
   (setf *x* (make-array *n* :element-type 'float)))
 
-(defun fetch-data (n)
+(defun fetch-data (&optional (n *n*))
+  (assert (and (integerp *n*) (> *n* 0)))  
   (let* ((cmd (str+
                "sqlite3 -json "
-               (uiop:getenv "HOME") "/projects/svg/data/heating.db"
+               (uiop:getenv "HOME")
+               "/projects/control-ui-backend/data/heating.db"
                " 'select * from heating order by ts "
                (format nil "asc limit ~a;'" n)))
          (data (uiop:run-program cmd :force-shell t
@@ -201,6 +213,7 @@
                                (fmt10 (* ,factor (- *h* *bottom-margin*)))))
           :stroke "grey" :stroke-width 1 :stroke-dasharray "3,3" :fill "none"))
 
+#|
 (let ((days #("So" "Mo" "Di" "Mi" "Do" "Fr" "Sa")))
   (loop for i from 0
         while (< i *n*)
@@ -209,14 +222,71 @@
                         (aref days (lt:timestamp-day-of-week ts))
                         (lt:timestamp-hour ts)
                         (lt:timestamp-minute ts))))
-
+|#
 (defun format-ts (uts)
   (let ((days #("So" "Mo" "Di" "Mi" "Do" "Fr" "Sa"))
         (ts (lt:universal-to-timestamp uts)))
-    (format nil "~a ~a:~a"
+    (format nil "~a ~2,'0d:~2,'0d"
             (aref days (lt:timestamp-day-of-week ts))
             (lt:timestamp-hour ts)
             (lt:timestamp-minute ts))))
+
+(defmacro make-strings (m)
+  `(make-array ,m :element-type 'string :initial-element ""))
+
+(defun time-labels (&optional (m *m*))
+  (assert (and (integerp m) (> m 0)))
+  (assert (and (integerp *n*) (> *n* 0)))
+  (assert (and *x* *ts*))
+  (let ((w (- *w* (* 2 *left-right-margin*))))
+    (when (< w (* m *lbl-width*))
+      (setf m (min *n* m (floor (/ w *lbl-width*)))))
+    (cond ((= m 1)
+           (let ((%i (+ (floor (/ *n* 2)))))
+             (setf *lbl-m* 1
+                   *lbl-text* (make-strings 1)
+                   *lbl-pos* (make-strings 1)
+                   (aref *lbl-text* 0) (format-ts (aref *ts* %i))
+                   (aref *lbl-pos* 0) (aref *x* %i))))
+          ((= m *n*)
+           (setf *lbl-m* (- m 2)
+                 *lbl-text* (make-strings *lbl-m*)
+                 *lbl-pos* (make-strings *lbl-m*))
+           (loop for i from 1
+                 while (<= i *lbl-m*)
+                 for text = (format-ts (aref *ts* (1- i)))
+                 do (setf (aref *lbl-pos* (1- i)) (aref *x* (1- i))
+                          (aref *lbl-text* (1- i)) text)))
+          ((< (/ *n* 3) m)
+           (setf *lbl-m* (min m (floor (/ *n* 2)))
+                 *lbl-text* (make-strings *lbl-m*)
+                 *lbl-pos*(make-strings *lbl-m*))
+           (if (evenp m)
+               (loop for i from 0
+                 while (< i *lbl-m*)
+                 for %j = (1+ (* 2 i))
+                 for text = (format-ts (aref *ts* %j))
+                 do (setf (aref *lbl-pos* i) (aref *x* %j)
+                          (aref *lbl-text* i) text))
+               (loop for i from 0
+                 while (< i *lbl-m*)
+                 for %j = (* 2 i)
+                 for text = (format-ts (aref *ts* %j))
+                 do (setf (aref *lbl-pos* i) (aref *x* %j)
+                          (aref *lbl-text* i) text))))
+          (t
+           (setf *lbl-m* m
+                 *lbl-text* (make-strings m)
+                 *lbl-pos*(make-strings m))
+           (let ((%di (floor (/ *n* m))))
+             (loop for i from 1
+                 
+                   while (< i m)
+                   for %j = (* %di i)
+                   while (< %j *n*)
+                   for text = (format-ts (aref *ts* (1- i)))
+                   do (setf (aref *lbl-pos* (1- i)) (aref *x* (1- i))
+                            (aref *lbl-text* (1- i)) text)))))))
 
 (defun generate-svg ()
   (let ((scene (make-svg-toplevel 'svg-1.1-toplevel :height *h* :width *w*))
