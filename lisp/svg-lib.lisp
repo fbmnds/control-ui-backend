@@ -15,6 +15,7 @@
 
 (defparameter *database* (str+ (uiop:getenv "HOME")
                                "/projects/control-ui-backend/data/heating.db"))
+(defparameter *svg-file* #p"svg/test.svg")
 
 (defparameter *n* nil)
 (defparameter *m* nil)
@@ -49,30 +50,6 @@
 (defparameter *y2* (make-array *n* :element-type 'float))
 (defparameter *x* (make-array *n* :element-type 'float))
 
-(defun select-index (n m)
-  (assert (<= m n))
-  (nreverse (loop for i from 0 to (1- m) collect (- n (floor (* i (/ n m)))))))
-
-(defun select-index (n m)
-  (assert (<= m n))
-  (let* ((idx (loop for i from 0 to (1- m) collect (floor (* i (/ n m)))))
-        (v (car (last idx))))
-    (assert (= (length idx) m))
-    (when (< v (1- n))
-      (mapcar (lambda (x) (+ x (- n v 1))) idx))))
-
-(defun set-input-parameter (&optional
-                              (width 300) (n 10)
-                              (height 200) (m 10)
-                              (left-right-margin 22)
-                              (bottom-margin 14))
-  (assert (< 200 width))
-  (assert (< 100 height))
-  (assert (< m height))
-  (setf *w* width *h* height *n* n *m* m
-        *left-right-margin* left-right-margin
-        *bottom-margin* bottom-margin))
-
 (defun init-parameter ()
   (setf *data* nil)
   
@@ -90,14 +67,27 @@
   (setf *dh-hum* nil)
   (setf *dw* nil)
 
-  (setf *lbl-width* 80)
   (setf *lbl-m* nil)
   (setf *lbl-text* nil)
   (setf *lbl-pos* nil)
 
-  (setf *y1* (make-array *n* :element-type 'float))
-  (setf *y2* (make-array *n* :element-type 'float))
-  (setf *x* (make-array *n* :element-type 'float)))
+  (setf *y1* nil)
+  (setf *y2* nil)
+  (setf *x* nil))
+
+(defun set-input-parameter (&optional
+                              (width 300) (n 10)
+                              (height 200) (m 10)
+                              (left-right-margin 22)
+                              (bottom-margin 14)
+                              (lbl-width 60))
+  (assert (< 200 width))
+  (assert (< 100 height))
+  (assert (< m height))
+  (setf *w* width *h* height *n* n *m* m
+        *left-right-margin* left-right-margin
+        *bottom-margin* bottom-margin
+        *lbl-width* lbl-width))
 
 (defun universal-timestamp (ts)
   (lt:timestamp-to-universal
@@ -107,6 +97,14 @@
 (defun round10 (x) (/ (round (* 10 x)) 10))
 
 (defun fmt10 (x) (format nil "~,1f" x))
+
+(defun select-index (n m)
+  (assert (<= m n))
+  (let* ((idx (loop for i from 0 to (1- m) collect (floor (* i (/ n m)))))
+        (v (car (last idx))))
+    (assert (= (length idx) m))
+    (when (< v (1- n))
+      (mapcar (lambda (x) (+ x (- n v 1))) idx))))
 
 (defun prepare-data (data)
   (assert data)
@@ -145,7 +143,9 @@
          (cmd (str+
                "sqlite3 -json "
                database
-               " 'select * from heating order by ts "
+               " 'select * from heating "
+               " where not temp is null and not hum is null "
+               " order by ts "
                (format nil "asc limit ~a;'" n)))
          (data (uiop:run-program cmd :force-shell t
                                      :output '(:string :stripped t)))
@@ -261,14 +261,15 @@
             (lt:timestamp-hour ts)
             (lt:timestamp-minute ts))))
 
-(defun generate-svg (&optional
-                       (h *h*) (w *w*) (n *n*) (m *m*)
-                       (left-right-margin *left-right-margin*)
-                       (bottom-margin *bottom-margin*)
-                       (lbl-width *lbl-width*)
-                       (dh-temp *dh-temp*) (min-temp *min-temp*)
-                       (dh-hum *dh-hum*) (min-hum *min-hum*)
-                       (arr-x *x*) (arr-y1 *y1*) (arr-y2 *y2*) (arr-ts *ts*))
+(defun draw-svg (&optional
+                   output
+                   (h *h*) (w *w*) (n *n*) (m *m*)
+                   (left-right-margin *left-right-margin*)
+                   (bottom-margin *bottom-margin*)
+                   (lbl-width *lbl-width*)
+                   (dh-temp *dh-temp*) (min-temp *min-temp*)
+                   (dh-hum *dh-hum*) (min-hum *min-hum*)
+                   (arr-x *x*) (arr-y1 *y1*) (arr-y2 *y2*) (arr-ts *ts*))
   (let* ((scene (make-svg-toplevel 'svg-1.1-toplevel :height h :width w))
          (lm (format nil "~a" left-right-margin))
          (h-bm (- h bottom-margin))
@@ -316,8 +317,22 @@
                             :points (str+ (fmt10 x) ",0 " (fmt10 x) "," h-bm-s))
                      :stroke "lightgrey" :stroke-width 1 :fill "none")))
     
-    (with-open-file (s #p"svg/test.svg" :direction :output :if-exists :supersede)
-      (stream-out s scene))
-    ;;(with-output-to-string (s) (stream-out s scene))
-    ))
+    (if (eql output :string)
+        (with-output-to-string (s) (stream-out s scene))
+        (with-open-file (s *svg-file* :direction :output :if-exists :supersede)
+          (stream-out s scene)))))
 
+(defun generate-svg (&optional
+                       output
+                       (width 300) (n 1200)
+                       (height 200) (m 10)
+                       (left-right-margin 22)
+                       (bottom-margin 14)
+                       (lbl-width 60))
+  (init-parameter)
+  (set-input-parameter
+   width n height m left-right-margin bottom-margin lbl-width)
+  (fetch-data)
+  (set-parameter)
+  (transform-data)
+  (draw-svg output))
