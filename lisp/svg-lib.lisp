@@ -1,21 +1,5 @@
-(ql:quickload :cl-svg)
-(ql:quickload :local-time)
-(ql:quickload :yason)
-(ql:quickload :parse-float)
-
-
-
-(defpackage :svg-lib
-  (:use :cl :cl-svg :parse-float)
-  (:local-nicknames (#:lt #:local-time)))
 
 (in-package :svg-lib)
-
-(defmacro str+ (&rest rest) `(concatenate 'string ,@rest))
-
-(defparameter *database* (str+ (uiop:getenv "HOME")
-                               "/projects/control-ui-backend/data/heating.db"))
-(defparameter *svg-file* #p"svg/test.svg")
 
 (defparameter *n* nil)
 (defparameter *m* nil)
@@ -192,9 +176,10 @@
           *max-ts* max-ts
           *dw* (- *max-ts* *min-ts*))))
 
-(defmacro mx-b (f max min h)
-  (let ((x (gensym)))
-    `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h))))
+(eval-when '(:compile-toplevel :load-toplevel)
+  (defmacro mx-b (f max min h)
+    (let ((x (gensym)))
+      `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h)))))
 
 (defmacro make-strings (m)
   `(make-array ,m :element-type 'string :initial-element ""))
