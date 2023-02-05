@@ -109,6 +109,7 @@
 (defun fmt10 (x) (format nil "~,1f" x))
 
 (defun prepare-data (data)
+  (assert data)
   (setf *n* (length data))
   (setf *temp* (make-array *n* :element-type 'float))
   (setf *hum* (make-array *n* :element-type 'float))
@@ -140,7 +141,7 @@
 (defun fetch-data (&optional
                      (n *n*) (w *w*)
                      (database *database*))
-  (let* ((idx (if (< w n) (select-index n w) (select-index w n)))
+  (let* ((idx (when (< w n) (select-index n w)))
          (cmd (str+
                "sqlite3 -json "
                database
@@ -148,8 +149,9 @@
                (format nil "asc limit ~a;'" n)))
          (data (uiop:run-program cmd :force-shell t
                                      :output '(:string :stripped t)))
-         (data (yason:parse data))
-         (data (loop for %i in idx collect (nth %i data))))
+         
+         (data (yason:parse data)))
+    (when idx (setf data (loop for i in idx collect (nth i data))))
     (prepare-data data)))
 
 (defun set-parameter (&optional
@@ -194,6 +196,9 @@
   (let ((x (gensym)))
     `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h))))
 
+(defmacro make-strings (m)
+  `(make-array ,m :element-type 'string :initial-element ""))
+
 (defun transform-data (&optional
                          (h *h*) (w *w*) (n *n*)
                          (left-right-margin *left-right-margin*)
@@ -207,6 +212,9 @@
                          (max-hum *max-hum*)
                          (min-ts *min-ts*)
                          (max-ts *max-ts*))
+  (setf *x* (make-array n :element-type 'float))
+  (setf *y1* (make-strings n))
+  (setf *y2* (make-strings n))
   (let ((h (- h bottom-margin))
         (w (- w (* 2 left-right-margin))))
     (assert (< 50 h))
@@ -228,7 +236,7 @@
           do (progn
                (setf (aref *y1* i) (fmt10 (mx-b-temp temp))
                      (aref *y2* i) (fmt10 (mx-b-hum hum))
-                     (aref *x* i) (+ *left-right-margin* (mx-b-ts ts)))))))
+                     (aref *x* i) (+ left-right-margin (mx-b-ts ts)))))))
 
 (defun points (x fmt-y)
   (reduce (lambda (x acc) (str+ x " " acc))
@@ -253,13 +261,11 @@
             (lt:timestamp-hour ts)
             (lt:timestamp-minute ts))))
 
-(defmacro make-strings (m)
-  `(make-array ,m :element-type 'string :initial-element ""))
-
 (defun generate-svg (&optional
                        (h *h*) (w *w*) (n *n*) (m *m*)
                        (left-right-margin *left-right-margin*)
                        (bottom-margin *bottom-margin*)
+                       (lbl-width *lbl-width*)
                        (dh-temp *dh-temp*) (min-temp *min-temp*)
                        (dh-hum *dh-hum*) (min-hum *min-hum*)
                        (arr-x *x*) (arr-y1 *y1*) (arr-y2 *y2*) (arr-ts *ts*))
@@ -295,17 +301,20 @@
     (draw scene (:polyline :points (str+ w-lm-s ",0 " w-lm-s "," h-bm-s))
           :stroke "blue" :stroke-width 1 :fill "none")
 
-    (loop for i from 0
-          while (< i n)
-          for x = (aref arr-x i)
-          for y = (- h 3)
-          for lb = (format-ts (aref arr-ts i))
-          do (text scene
-                 (:x x :y y :font-size 9 :fill "black") lb)
-             (draw scene (:polyline
-                          :points (str+ (fmt10 x) ",0 " (fmt10 x) "," h-bm-s))
-                   :stroke "lightgrey" :stroke-width 1 :fill "none"))
-    
+    (let (idx
+          (n2 (floor (/ w-lm lbl-width))))
+      (if (< n2 n)
+          (setf idx (select-index n n2))
+          (setf idx (loop for %i in idx while (< %i n) collect %i)))
+      (loop for i in idx
+            for x = (aref arr-x i)
+            for y = (- h 3)
+            for lb = (format-ts (aref arr-ts i))
+            do (text scene
+                   (:x (- x 22) :y y :font-size 9 :fill "black") lb)
+               (draw scene (:polyline
+                            :points (str+ (fmt10 x) ",0 " (fmt10 x) "," h-bm-s))
+                     :stroke "lightgrey" :stroke-width 1 :fill "none")))
     
     (with-open-file (s #p"svg/test.svg" :direction :output :if-exists :supersede)
       (stream-out s scene))

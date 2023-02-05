@@ -8,47 +8,47 @@
   <polyline points="22,18.6 278,18.6" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="167.40" font-size="10" fill="green">
-    9.9
+    9.6
   </text>
   <text x="279" y="167.40" font-size="10" fill="blue">
-    56.2
+    55.8
   </text>
   <polyline points="22,37.2 278,37.2" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="148.80" font-size="10" fill="green">
-    9.9
+    9.7
   </text>
   <text x="279" y="148.80" font-size="10" fill="blue">
-    56.3
+    55.9
   </text>
   <polyline points="22,55.8 278,55.8" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="130.20" font-size="10" fill="green">
-    10.0
+    9.8
   </text>
   <text x="279" y="130.20" font-size="10" fill="blue">
-    56.3
+    56.0
   </text>
   <polyline points="22,74.4 278,74.4" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="111.60" font-size="10" fill="green">
-    10.0
+    9.9
   </text>
   <text x="279" y="111.60" font-size="10" fill="blue">
-    56.3
+    56.2
   </text>
   <polyline points="22,93.0 278,93.0" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="93" font-size="10" fill="green">
-    10.0
+    10.1
   </text>
   <text x="279" y="93" font-size="10" fill="blue">
-    56.4
+    56.3
   </text>
   <polyline points="22,111.6 278,111.6" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="74.40" font-size="10" fill="green">
-    10.0
+    10.2
   </text>
   <text x="279" y="74.40" font-size="10" fill="blue">
     56.4
@@ -56,45 +56,50 @@
   <polyline points="22,130.2 278,130.2" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="55.80" font-size="10" fill="green">
-    10.0
+    10.3
   </text>
   <text x="279" y="55.80" font-size="10" fill="blue">
-    56.4
+    56.5
   </text>
   <polyline points="22,148.8 278,148.8" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="37.20" font-size="10" fill="green">
-    10.1
+    10.4
   </text>
   <text x="279" y="37.20" font-size="10" fill="blue">
-    56.4
+    56.6
   </text>
   <polyline points="22,167.4 278,167.4" stroke="grey" stroke-width="1"
             stroke-dasharray="3,3" fill="none"/>
   <text x="1" y="18.60" font-size="10" fill="green">
-    10.1
+    10.5
   </text>
   <text x="279" y="18.60" font-size="10" fill="blue">
-    56.5
+    56.7
   </text>
-  <polyline points=" 40.7,67.6 47.7,67.6 65.8,67.6 102.7,67.6 139.6,67.6 176.5,84.5 213.4,84.5 217.5,101.5 240.1,101.5 259.3,67.6"
+  <polyline points=" 40.7,84.5 47.7,84.5 65.8,84.5 102.7,84.5 139.6,84.5 176.5,101.5 213.4,101.5 217.5,118.4 240.1,118.4 259.3,84.5"
             stroke="green" stroke-width="1" fill="none"/>
-  <polyline points=" 40.7,97.0 47.7,113.2 65.8,113.2 102.7,97.0 139.6,97.0 176.5,97.0 213.4,80.9 217.5,80.9 240.1,80.9 259.3,129.4"
+  <polyline points=" 40.7,72.8 47.7,89.0 65.8,89.0 102.7,72.8 139.6,72.8 176.5,72.8 213.4,56.6 217.5,56.6 240.1,56.6 259.3,105.1"
             stroke="blue" stroke-width="1" fill="none"/>
   <polyline points="22,0 22,186" stroke="green" stroke-width="1" fill="none"/>
   <polyline points="22,186 278,186" stroke="black" stroke-width="1" fill="none"/>
   <polyline points="278,0 278,186" stroke="blue" stroke-width="1" fill="none"/>
-  <text x="27.70" y="197" font-size="9" fill="black">
-    Fr 16:29
+  <text x="43.76" y="197" font-size="9" fill="black">
+    Fr 16:34
   </text>
-  <polyline points="47.7,0 47.7,186" stroke="lightgrey" stroke-width="1"
+  <polyline points="65.8,0 65.8,186" stroke="lightgrey" stroke-width="1"
             fill="none"/>
-  <text x="156.50" y="197" font-size="9" fill="black">
-    Fr 17:04
+  <text x="117.60" y="197" font-size="9" fill="black">
+    Fr 16:54
   </text>
-  <polyline points="176.5,0 176.5,186" stroke="lightgrey" stroke-width="1"
+  <polyline points="139.6,0 139.6,186" stroke="lightgrey" stroke-width="1"
             fill="none"/>
-  <text x="239.30" y="197" font-size="9" fill="black">
+  <text x="195.54" y="197" font-size="9" fill="black">
+    Fr 17:15
+  </text>
+  <polyline points="217.5,0 217.5,186" stroke="lightgrey" stroke-width="1"
+            fill="none"/>
+  <text x="237.28" y="197" font-size="9" fill="black">
     Fr 17:26
   </text>
   <polyline points="259.3,0 259.3,186" stroke="lightgrey" stroke-width="1"
