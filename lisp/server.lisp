@@ -1,7 +1,8 @@
 
 (defpackage :rx
   (:use :cl)
-  (:local-nicknames (#:a #:alexandria)))
+  (:local-nicknames (#:a #:alexandria))
+  (:export #:route))
 
 (in-package :rx)
 
@@ -13,12 +14,59 @@
         `(,rc ,hdr ,body)
         (let ((b `,body)) `(,rc ,hdr (,b))))))
 
-(export 'route)
-
 
 (in-package :svg-lib)
 
 (defparameter *clack-server* nil)
+(defparameter *svg-thread* nil)
+(defparameter *request-queue* (lpq:make-queue))
+(defparameter *svg-intervall* 5)
+(defparameter *svg-clients* (list "192.168.178.31"))
+
+(defclass request () ())
+
+(defclass broadcast-request (request) ())
+
+(defclass register-request (request)
+  ((url :accessor url)))
+
+(defclass remove-request (request)
+  ((url :accessor url)))
+
+(defgeneric fulfill (request))
+
+(defun send-svg(url)
+  (let* ((svg (generate-svg :string))
+         (url (str+ "ws://" url ":7700/"))
+         (client (wsd:make-client url)))
+    (progn
+     (ws:on :open client (lambda () (format t "~&connected~%")))
+     (ws:on :message client (lambda (message) (format t " ~a" message)))
+     (ws:start-connection client)
+     (ws:send client svg)
+     (sleep 1))
+    (ws:close-connection client)))
+
+(defmethod fulfill ((request broadcast-request))
+  (loop for url in *svg-clients* do (send-svg url)))
+
+(defmethod fulfill ((request register-request))
+  (let ((url (url request)))
+    (unless (member url *svg-clients* :test 'equal)
+      (push url *svg-clients*))))
+
+(defmethod fulfill ((request remove-request))
+  (let ((url (url request))) 
+    (setf *svg-clients*
+          (remove-if (lambda (%url) (equal %url url)) *svg-clients*))))
+
+(defun start-svg-thread ()
+  (setf *svg-thread*
+        (bt:make-thread (lambda ()
+                          (loop when (lpq:queue-empty-p *request-queue*)
+                                  do (sleep *svg-intervall*)
+                                do (fulfill (lpq:pop-queue *request-queue*))))
+                        :name "svg")))
 
 (defun handler (env)
   (let (;;(js-hdr '(:content-type "application/javascript"))

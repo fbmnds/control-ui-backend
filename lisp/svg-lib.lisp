@@ -176,10 +176,10 @@
           *max-ts* max-ts
           *dw* (- *max-ts* *min-ts*))))
 
-(eval-when '(:compile-toplevel :load-toplevel)
-  (defmacro mx-b (f max min h)
+;;(eval-when '(:compile-toplevel :load-toplevel))
+(defmacro mx-b (f max min h)
     (let ((x (gensym)))
-      `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h)))))
+      `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h))))
 
 (defmacro make-strings (m)
   `(make-array ,m :element-type 'string :initial-element ""))
