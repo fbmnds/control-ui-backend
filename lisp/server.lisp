@@ -12,7 +12,7 @@
             (a:starts-with-subseq path env-path))
     (if (pathnamep body)
         `(,rc ,hdr ,body)
-        (let ((b `,body)) `(,rc ,hdr (,b))))))
+        `(,rc ,hdr (,body)))))
 
 
 (in-package :svg-lib)
@@ -73,28 +73,30 @@
         ;;(json-hdr '(:content-type "application/json"))
         (svg-hdr '(:content-type "image/svg+xml"))
         ;;(x-icon-hdr '(:content-type "image/x-icon"))
-        (plain-text-hdr '(:content-type "plain/text"))
+        ;;(plain-text-hdr '(:content-type "plain/text"))
         (path (getf env :path-info)))
     (handler-case
         (or
          ;;(rx:route path "/index.html"
          ;;          200 '(:access-control-allow-origin "*") *index*)
          ;;#-ecl (rx:route path "/assets/favicon.ico" 200 x-icon-hdr *favicon* t)
-         (rx:route path "/svg" 200 svg-hdr `,(generate-svg :string))
-         (rx:route path "/register/192.168.178."
-                   200 plain-text-hdr
-                   `,(lpq:push-queue
-                      (make-instance
-                       'register-request
-                       :url (subseq `,path (length "/register/")))
-                      *request-queue*))
-         (rx:route path "/remove/192.168.178."
-                   200 plain-text-hdr
-                   `,(lpq:push-queue
-                      (make-instance
-                       'remove-request
-                       :url (subseq `,path (length "/remove/")))
-                      *request-queue*))
+         (when (x:starts-with "/svg" path)
+           (let ((svg (generate-svg :string)))
+             `(200 ,svg-hdr (,svg))))
+         (when (x:starts-with "/register/192.168.178." path)
+           (format t "register")
+           (lpq:push-queue
+            (make-instance 'register-request
+                           :url (subseq path (length "/register/")))
+            *request-queue*)
+           `(200 nil ("")))
+         (when (x:starts-with "/remove/192.168.178." path)
+           (format t "remove")
+           (lpq:push-queue
+            (make-instance 'remove-request
+                           :url (subseq path (length "/remove/")))
+            *request-queue*)
+           `(200 nil ("")))
          `(404 nil (,(format nil "Path not found~%"))))
       (t (e) (if *debug*
                  `(500 nil (,(format nil "Internal Server Error~%~A~%" e)))
@@ -102,7 +104,7 @@
 
 (defun start (handler)
   (setf *clack-server* 
-        (clack:clackup handler :server :woo :address "0.0.0.0" :port 7700)))
+        (clack:clackup handler :server :woo :address "0.0.0.0" :port 7000)))
 
 (defun stop ()
   (prog1

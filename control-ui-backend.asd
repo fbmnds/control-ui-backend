@@ -1,6 +1,7 @@
 (defsystem :control-ui-backend
   :serial t
-  :depends-on (:cl-svg :local-time :yason :parse-float :bordeaux-threads
+  :depends-on (:cl-svg :local-time :yason :parse-float
+               :bordeaux-threads :lparallel
                :woo :clack :websocket-driver :websocket-driver-client)
   :components ((:file "lisp/package")
                (:file "lisp/x")

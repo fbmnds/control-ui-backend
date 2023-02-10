@@ -176,13 +176,18 @@
           *max-ts* max-ts
           *dw* (- *max-ts* *min-ts*))))
 
-;;(eval-when '(:compile-toplevel :load-toplevel))
+#|
 (defmacro mx-b (f max min h)
-    (let ((x (gensym)))
-      `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h))))
+  (let ((x (gensym)))
+    `(defun ,f (,x) (* (/ (- ,max ,x) (- ,max ,min)) ,h))))
+|#
+
+(defun mx-b (max min h)
+  (lambda (x) (* (/ (- max x) (- max min)) h)))
 
 (defmacro make-strings (m)
   `(make-array ,m :element-type 'string :initial-element ""))
+
 
 (defun transform-data (&optional
                          (h *h*) (w *w*) (n *n*)
@@ -202,26 +207,26 @@
   (setf *y2* (make-strings n))
   (let ((h (- h bottom-margin))
         (w (- w (* 2 left-right-margin))))
-    (assert (< 50 h))
     (assert (< 100 w))
-    (mx-b mx-b-temp max-temp min-temp h)
-    (assert (< (abs (- (mx-b-temp min-temp) h)) 0.001))
-    (assert (< (abs (mx-b-temp max-temp)) 0.001))
-    (mx-b mx-b-hum max-hum min-hum h)
-    (assert (< (abs (- (mx-b-hum min-hum) h)) 0.001))
-    (assert (< (abs (mx-b-hum max-hum)) 0.001))
-    (mx-b mx-b-ts min-ts max-ts w)
-    (assert (< (abs (- (mx-b-ts max-ts) w)) 0.001))
-    (assert (< (abs (mx-b-ts min-ts)) 0.001))
-    (loop for i from 0
-          while (< i n)
-          for temp = (aref arr-temp i)
-          for hum = (aref arr-hum i)
-          for ts = (aref arr-ts i)
-          do (progn
-               (setf (aref *y1* i) (fmt10 (mx-b-temp temp))
-                     (aref *y2* i) (fmt10 (mx-b-hum hum))
-                     (aref *x* i) (+ left-right-margin (mx-b-ts ts)))))))
+    (assert (< 50 h))
+    (flet ((mx-b-temp (x) (funcall (mx-b max-temp min-temp h) x))
+           (mx-b-hum (x) (funcall (mx-b max-hum min-hum h) x))
+           (mx-b-ts (x) (funcall (mx-b min-ts max-ts w) x)))
+      (assert (< (abs (- (mx-b-temp min-temp) h)) 0.001))
+      (assert (< (abs (mx-b-temp max-temp)) 0.001))
+      (assert (< (abs (- (mx-b-hum min-hum) h)) 0.001))
+      (assert (< (abs (mx-b-hum max-hum)) 0.001))
+      (assert (< (abs (- (mx-b-ts max-ts) w)) 0.001))
+      (assert (< (abs (mx-b-ts min-ts)) 0.001))      
+      (loop for i from 0
+            while (< i n)
+            for temp = (aref arr-temp i)
+            for hum = (aref arr-hum i)
+            for ts = (aref arr-ts i)
+            do (progn
+                 (setf (aref *y1* i) (fmt10 (mx-b-temp temp))
+                       (aref *y2* i) (fmt10 (mx-b-hum hum))
+                       (aref *x* i) (+ left-right-margin (mx-b-ts ts))))))))
 
 (defun points (x fmt-y)
   (reduce (lambda (x acc) (str+ x " " acc))
