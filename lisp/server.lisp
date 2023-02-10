@@ -28,10 +28,10 @@
 (defclass broadcast-request (request) ())
 
 (defclass register-request (request)
-  ((url :accessor url)))
+  ((url :initarg :url :accessor url)))
 
 (defclass remove-request (request)
-  ((url :accessor url)))
+  ((url :initarg :url :accessor url)))
 
 (defgeneric fulfill (request))
 
@@ -73,16 +73,28 @@
         ;;(json-hdr '(:content-type "application/json"))
         (svg-hdr '(:content-type "image/svg+xml"))
         ;;(x-icon-hdr '(:content-type "image/x-icon"))
-        ;;(plain-text-hdr '(:content-type "plain/text"))
+        (plain-text-hdr '(:content-type "plain/text"))
         (path (getf env :path-info)))
     (handler-case
         (or
-         (rx:route path "/svg" 200 svg-hdr
-                   `,(progn (draw-svg :string)))
          ;;(rx:route path "/index.html"
          ;;          200 '(:access-control-allow-origin "*") *index*)
          ;;#-ecl (rx:route path "/assets/favicon.ico" 200 x-icon-hdr *favicon* t)
-         ;;(rx:route path "/assets/data.csv" 200 plain-text-hdr *data* t)
+         (rx:route path "/svg" 200 svg-hdr `,(generate-svg :string))
+         (rx:route path "/register/192.168.178."
+                   200 plain-text-hdr
+                   `,(lpq:push-queue
+                      (make-instance
+                       'register-request
+                       :url (subseq `,path (length "/register/")))
+                      *request-queue*))
+         (rx:route path "/remove/192.168.178."
+                   200 plain-text-hdr
+                   `,(lpq:push-queue
+                      (make-instance
+                       'remove-request
+                       :url (subseq `,path (length "/remove/")))
+                      *request-queue*))
          `(404 nil (,(format nil "Path not found~%"))))
       (t (e) (if *debug*
                  `(500 nil (,(format nil "Internal Server Error~%~A~%" e)))
