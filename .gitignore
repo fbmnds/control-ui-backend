@@ -1,3 +1,4 @@
+data/
 *.FASL
 *.fasl
 *.lisp-temp
