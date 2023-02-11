@@ -97,6 +97,10 @@
                            :url (subseq path (length "/remove/")))
             *request-queue*)
            `(200 nil ("")))
+         (when (x:starts-with "/broadcast" path)
+           (format t "broafcast")
+           (lpq:push-queue (make-instance 'broadcast-request) *request-queue*)
+           `(200 nil ("")))
          `(404 nil (,(format nil "Path not found~%"))))
       (t (e) (if *debug*
                  `(500 nil (,(format nil "Internal Server Error~%~A~%" e)))
