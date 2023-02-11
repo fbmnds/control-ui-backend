@@ -314,7 +314,7 @@
 
 (defun generate-svg (&optional
                        output
-                       (width 300) (n 1200)
+                       (width 300) (n 200)
                        (height 200) (m 10)
                        (left-right-margin 22)
                        (bottom-margin 14)
