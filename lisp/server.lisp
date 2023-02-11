@@ -98,7 +98,7 @@
             *request-queue*)
            `(200 nil ("")))
          (when (x:starts-with "/broadcast" path)
-           (format t "broafcast")
+           (format t "broadcast")
            (lpq:push-queue (make-instance 'broadcast-request) *request-queue*)
            `(200 nil ("")))
          `(404 nil (,(format nil "Path not found~%"))))
