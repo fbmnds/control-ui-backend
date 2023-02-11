@@ -130,7 +130,7 @@
                " 'select * from heating "
                " where not temp is null and not hum is null "
                " order by ts "
-               (format nil "asc limit ~a;'" n)))
+               (format nil " desc limit ~a;'" n)))
          (data (uiop:run-program cmd :force-shell t
                                      :output '(:string :stripped t)))
          
