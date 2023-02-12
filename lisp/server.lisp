@@ -99,7 +99,7 @@
            `(200 nil ("")))
          (when (x:starts-with "/broadcast" path)
            (format t "broadcast")
-           (fullfill (make-instance 'broadcast-request))
+           (fulfill (make-instance 'broadcast-request))
            `(200 nil ("")))
          `(404 nil (,(format nil "Path not found~%"))))
       (t (e) (if *debug*
@@ -108,7 +108,7 @@
 
 (defun start (handler)
   (setf *clack-server* 
-        (clack:clackup handler :server :woo :address "0.0.0.0" :port 7000)))
+        (clack:clackup handler :server :hunchentoot :address "0.0.0.0" :port 7000)))
 
 (defun stop ()
   (prog1
